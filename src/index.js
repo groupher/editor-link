@@ -266,9 +266,8 @@ export default class LinkTool {
    */
   prepareLinkPreview() {
     const { linkContent } = this.CSS;
-    const linkAddr = linkContent.indexOf === 0 ? linkContent : `http://${linkContent}`;
 
-    const holder = this.make('a', linkAddr, {
+    const holder = this.make('a', linkContent, {
       target: '_blank',
       rel: 'nofollow noindex noreferrer'
     });
@@ -303,8 +302,11 @@ export default class LinkTool {
       this.nodes.linkContent.appendChild(this.nodes.linkDescription);
     }
 
+    const { link } = this.data;
+    const linkAddr = link.indexOf('http') === 0 ? link : `http://${link}`;
+
     this.nodes.linkContent.classList.add(this.CSS.linkContentRendered);
-    this.nodes.linkContent.setAttribute('href', this.data.link);
+    this.nodes.linkContent.setAttribute('href', linkAddr);
     this.nodes.linkContent.appendChild(this.nodes.linkText);
 
     try {
