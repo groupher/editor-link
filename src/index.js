@@ -265,7 +265,10 @@ export default class LinkTool {
    * @return {HTMLElement}
    */
   prepareLinkPreview() {
-    const holder = this.make('a', this.CSS.linkContent, {
+    const { linkContent } = this.CSS;
+    const linkAddr = linkContent.indexOf === 0 ? linkContent : `http://${linkContent}`;
+
+    const holder = this.make('a', linkAddr, {
       target: '_blank',
       rel: 'nofollow noindex noreferrer'
     });
@@ -408,7 +411,7 @@ export default class LinkTool {
    * @return {HTMLElement}
    */
   make(tagName, classNames = null, attributes = {}) {
-    let el = document.createElement(tagName);
+    const el = document.createElement(tagName);
 
     if (Array.isArray(classNames)) {
       el.classList.add(...classNames);
@@ -416,7 +419,7 @@ export default class LinkTool {
       el.classList.add(classNames);
     }
 
-    for (let attrName in attributes) {
+    for (const attrName in attributes) {
       el[attrName] = attributes[attrName];
     }
 
