@@ -14,11 +14,13 @@
  */
 
 // eslint-disable-next-line
+import { make } from "@groupher/editor-utils";
+
 import css from './index.css';
 import ToolboxIcon from './svg/toolbox.svg';
 import ajax from '@codexteam/ajax';
 // eslint-disable-next-line
-import polyfill from 'url-polyfill';
+import polyfill from "url-polyfill";
 
 /**
  * @typedef {object} UploadResponseFormat
@@ -40,7 +42,7 @@ export default class LinkTool {
   static get toolbox() {
     return {
       icon: ToolboxIcon,
-      title: 'Link'
+      title: '链接'
     };
   }
 
@@ -96,8 +98,8 @@ export default class LinkTool {
    * @return {HTMLDivElement}
    */
   render() {
-    this.nodes.wrapper = this.make('div', this.CSS.baseClass);
-    this.nodes.container = this.make('div', this.CSS.container);
+    this.nodes.wrapper = make('div', this.CSS.baseClass);
+    this.nodes.container = make('div', this.CSS.container);
 
     this.nodes.inputHolder = this.makeInputHolder();
     this.nodes.linkContent = this.prepareLinkPreview();
@@ -132,10 +134,13 @@ export default class LinkTool {
    * @param {LinkToolData} data
    */
   set data(data) {
-    this._data = Object.assign({}, {
-      link: data.link || this._data.link,
-      meta: data.meta || this._data.meta
-    });
+    this._data = Object.assign(
+      {},
+      {
+        link: data.link || this._data.link,
+        meta: data.meta || this._data.meta
+      }
+    );
   }
 
   /**
@@ -179,14 +184,15 @@ export default class LinkTool {
    * @return {HTMLElement} - url input
    */
   makeInputHolder() {
-    const inputHolder = this.make('div', this.CSS.inputHolder);
+    const inputHolder = make('div', this.CSS.inputHolder);
 
-    this.nodes.progress = this.make('label', this.CSS.progress);
-    this.nodes.input = this.make('div', [this.CSS.input, this.CSS.inputEl], {
+    this.nodes.progress = make('label', this.CSS.progress);
+    this.nodes.input = make('div', [this.CSS.input, this.CSS.inputEl], {
       contentEditable: true
     });
 
-    this.nodes.input.dataset.placeholder = 'Link';
+    // TODO: i18n
+    this.nodes.input.dataset.placeholder = '链接地址';
 
     this.nodes.input.addEventListener('paste', (event) => {
       this.startFetching(event);
@@ -267,15 +273,15 @@ export default class LinkTool {
   prepareLinkPreview() {
     const { linkContent } = this.CSS;
 
-    const holder = this.make('a', linkContent, {
+    const holder = make('a', linkContent, {
       target: '_blank',
       rel: 'nofollow noindex noreferrer'
     });
 
-    this.nodes.linkImage = this.make('div', this.CSS.linkImage);
-    this.nodes.linkTitle = this.make('div', this.CSS.linkTitle);
-    this.nodes.linkDescription = this.make('p', this.CSS.linkDescription);
-    this.nodes.linkText = this.make('span', this.CSS.linkText);
+    this.nodes.linkImage = make('div', this.CSS.linkImage);
+    this.nodes.linkTitle = make('div', this.CSS.linkTitle);
+    this.nodes.linkDescription = make('p', this.CSS.linkDescription);
+    this.nodes.linkText = make('span', this.CSS.linkText);
 
     return holder;
   }
@@ -309,11 +315,12 @@ export default class LinkTool {
     this.nodes.linkContent.setAttribute('href', linkAddr);
     this.nodes.linkContent.appendChild(this.nodes.linkText);
 
-    try {
-      this.nodes.linkText.textContent = (new URL(this.data.link)).hostname;
-    } catch (e) {
-      this.nodes.linkText.textContent = this.data.link;
-    }
+    this.nodes.linkText.textContent = this.data.link;
+    // try {
+    //   this.nodes.linkText.textContent = new URL(this.data.link).hostname;
+    // } catch (e) {
+    //   this.nodes.linkText.textContent = this.data.link;
+    // }
   }
 
   /**
@@ -352,16 +359,16 @@ export default class LinkTool {
     this.data = { link: url };
 
     try {
-      const response = await (ajax.get({
+      const response = await ajax.get({
         url: this.config.endpoint,
         data: {
           url
         }
-      }));
+      });
 
       this.onFetch(response);
     } catch (error) {
-      this.fetchingFailed('Haven\'t received data from server');
+      this.fetchingFailed("Haven't received data from server");
     }
   }
 
@@ -403,28 +410,5 @@ export default class LinkTool {
     });
 
     this.applyErrorStyle();
-  }
-
-  /**
-   * Helper method for elements creation
-   * @param tagName
-   * @param classNames
-   * @param attributes
-   * @return {HTMLElement}
-   */
-  make(tagName, classNames = null, attributes = {}) {
-    const el = document.createElement(tagName);
-
-    if (Array.isArray(classNames)) {
-      el.classList.add(...classNames);
-    } else if (classNames) {
-      el.classList.add(classNames);
-    }
-
-    for (const attrName in attributes) {
-      el[attrName] = attributes[attrName];
-    }
-
-    return el;
   }
 }

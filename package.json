@@ -46,6 +46,7 @@
   },
   "homepage": "https://github.com/editor-js/link#readme",
   "dependencies": {
-    "@babel/runtime": "^7.3.1"
+    "@babel/runtime": "^7.3.1",
+    "@groupher/editor-utils": "^0.1.71"
   }
 }
