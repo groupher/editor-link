@@ -1,5 +1,6 @@
 .link-tool {
   position: relative;
+  padding: 20px 0;
 
   &__input {
     padding-left: 38px;
@@ -121,15 +122,12 @@
   }
 
   &__anchor {
-    display: block;
     font-size: 13px;
+    min-width: 120px;
     color: #888 !important;
     border: 0 !important;
     padding: 0 !important;
-    width: 300px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    text-decoration: none;
   }
 }
 

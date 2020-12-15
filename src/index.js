@@ -18,6 +18,12 @@ import { make } from "@groupher/editor-utils";
 
 import css from './index.css';
 import ToolboxIcon from './svg/toolbox.svg';
+import UnderlineIcon from './svg/underline.svg';
+import CardIcon from './svg/card.svg';
+import EditIcon from './svg/edit.svg';
+
+import Ui from './ui';
+
 import ajax from '@codexteam/ajax';
 // eslint-disable-next-line
 import polyfill from "url-polyfill";
@@ -71,6 +77,7 @@ export default class LinkTool {
     };
 
     this.nodes = {
+      // root element
       wrapper: null,
       container: null,
       progress: null,
@@ -89,6 +96,14 @@ export default class LinkTool {
     };
 
     this.data = data;
+
+    this.ui = new Ui({
+      api,
+      config: this.config,
+      data: this.data
+      // setTune: this.setTune.bind(this),
+      // setData: this.setData.bind(this),
+    });
   }
 
   /**
@@ -101,22 +116,74 @@ export default class LinkTool {
     this.nodes.wrapper = make('div', this.CSS.baseClass);
     this.nodes.container = make('div', this.CSS.container);
 
-    this.nodes.inputHolder = this.makeInputHolder();
-    this.nodes.linkContent = this.prepareLinkPreview();
-
     /**
      * If Tool already has data, render link preview, otherwise insert input
      */
     if (Object.keys(this.data.meta).length) {
-      this.nodes.container.appendChild(this.nodes.linkContent);
-      this.showLinkPreview(this.data.meta);
+      return this.ui.buildInputView();
+      // return this.ui.buildCardView();
     } else {
-      this.nodes.container.appendChild(this.nodes.inputHolder);
+      return this.ui.buildInputView();
     }
+  }
 
-    this.nodes.wrapper.appendChild(this.nodes.container);
+  /**
+   * replace element wrapper with new html element
+   * @param {HTMLElement} node
+   */
+  replaceElement(node) {
+    this.element.replaceWith(node);
+    this.element = node;
 
-    return this.nodes.wrapper;
+    this.api.tooltip.hide();
+    this.api.toolbar.close();
+  }
+
+  /**
+   * render Setting buttons
+   * @public
+   */
+  renderSettings() {
+    const Wrapper = make('div', [ this.CSS.settingsWrapper ], {});
+
+    const settings = [
+      {
+        title: '普通链接',
+        icon: UnderlineIcon
+      },
+      {
+        title: '卡片链接',
+        icon: CardIcon
+      },
+      {
+        title: '编辑链接',
+        icon: EditIcon
+      }
+    ];
+
+    settings.forEach((item) => {
+      const itemEl = make('div', this.CSS.settingsButton, {
+        innerHTML: item.icon
+      });
+
+      this.api.tooltip.onHover(itemEl, item.title, {
+        placement: 'top'
+      });
+
+      // itemEl.classList.add(this.CSS.settingsButtonActive);
+
+      // itemEl.addEventListener("click", () => {
+      //   this.setTune(item.name, this.exportData(), this.sortType);
+
+      //   this.clearSettingHighlight(Wrapper);
+      //   // mark active
+      //   itemEl.classList.toggle(this.CSS.settingsButtonActive);
+      // });
+
+      Wrapper.appendChild(itemEl);
+    });
+
+    return Wrapper;
   }
 
   /**
@@ -175,240 +242,12 @@ export default class LinkTool {
       linkText: 'link-tool__anchor',
       progress: 'link-tool__progress',
       progressLoading: 'link-tool__progress--loading',
-      progressLoaded: 'link-tool__progress--loaded'
+      progressLoaded: 'link-tool__progress--loaded',
+
+      // buttons
+      settingsWrapper: 'cdx-custom-settings',
+      settingsButton: this.api.styles.settingsButton,
+      settingsButtonActive: this.api.styles.settingsButtonActive
     };
-  }
-
-  /**
-   * Prepare input holder
-   * @return {HTMLElement} - url input
-   */
-  makeInputHolder() {
-    const inputHolder = make('div', this.CSS.inputHolder);
-
-    this.nodes.progress = make('label', this.CSS.progress);
-    this.nodes.input = make('div', [this.CSS.input, this.CSS.inputEl], {
-      contentEditable: true
-    });
-
-    // TODO: i18n
-    this.nodes.input.dataset.placeholder = '链接地址';
-
-    this.nodes.input.addEventListener('paste', (event) => {
-      this.startFetching(event);
-    });
-
-    this.nodes.input.addEventListener('keydown', (event) => {
-      const [ENTER, A] = [13, 65];
-      const cmdPressed = event.ctrlKey || event.metaKey;
-
-      switch (event.keyCode) {
-        case ENTER:
-          event.preventDefault();
-          event.stopPropagation();
-
-          this.startFetching(event);
-          break;
-        case A:
-          if (cmdPressed) {
-            this.selectLinkUrl(event);
-          }
-          break;
-      }
-    });
-
-    inputHolder.appendChild(this.nodes.progress);
-    inputHolder.appendChild(this.nodes.input);
-
-    return inputHolder;
-  }
-
-  /**
-   * Activates link data fetching by url
-   */
-  startFetching(event) {
-    let url = this.nodes.input.textContent;
-
-    if (event.type === 'paste') {
-      url = (event.clipboardData || window.clipboardData).getData('text');
-    }
-
-    this.removeErrorStyle();
-    this.fetchLinkData(url);
-  }
-
-  /**
-   * If previous link data fetching failed, remove error styles
-   */
-  removeErrorStyle() {
-    this.nodes.inputHolder.classList.remove(this.CSS.inputError);
-    this.nodes.inputHolder.insertBefore(this.nodes.progress, this.nodes.input);
-  }
-
-  /**
-   * Select LinkTool input content by CMD+A
-   * @param {KeyboardEvent} event
-   */
-  selectLinkUrl(event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const selection = window.getSelection();
-    const range = new Range();
-
-    const currentNode = selection.anchorNode.parentNode;
-    const currentItem = currentNode.closest(`.${this.CSS.inputHolder}`);
-    const inputElement = currentItem.querySelector(`.${this.CSS.inputEl}`);
-
-    range.selectNodeContents(inputElement);
-
-    selection.removeAllRanges();
-    selection.addRange(range);
-  }
-
-  /**
-   * Prepare link preview holder
-   * @return {HTMLElement}
-   */
-  prepareLinkPreview() {
-    const { linkContent } = this.CSS;
-
-    const holder = make('a', linkContent, {
-      target: '_blank',
-      rel: 'nofollow noindex noreferrer'
-    });
-
-    this.nodes.linkImage = make('div', this.CSS.linkImage);
-    this.nodes.linkTitle = make('div', this.CSS.linkTitle);
-    this.nodes.linkDescription = make('p', this.CSS.linkDescription);
-    this.nodes.linkText = make('span', this.CSS.linkText);
-
-    return holder;
-  }
-
-  /**
-   * Compose link preview from fetched data
-   * @param {metaData} meta - link meta data
-   */
-  showLinkPreview({ image, title, description }) {
-    this.nodes.container.appendChild(this.nodes.linkContent);
-
-    if (image && image.url) {
-      this.nodes.linkImage.style.backgroundImage = 'url(' + image.url + ')';
-      this.nodes.linkContent.appendChild(this.nodes.linkImage);
-    }
-
-    if (title) {
-      this.nodes.linkTitle.textContent = title;
-      this.nodes.linkContent.appendChild(this.nodes.linkTitle);
-    }
-
-    if (description) {
-      this.nodes.linkDescription.textContent = description;
-      this.nodes.linkContent.appendChild(this.nodes.linkDescription);
-    }
-
-    const { link } = this.data;
-    const linkAddr = link.indexOf('http') === 0 ? link : `http://${link}`;
-
-    this.nodes.linkContent.classList.add(this.CSS.linkContentRendered);
-    this.nodes.linkContent.setAttribute('href', linkAddr);
-    this.nodes.linkContent.appendChild(this.nodes.linkText);
-
-    this.nodes.linkText.textContent = this.data.link;
-    // try {
-    //   this.nodes.linkText.textContent = new URL(this.data.link).hostname;
-    // } catch (e) {
-    //   this.nodes.linkText.textContent = this.data.link;
-    // }
-  }
-
-  /**
-   * Show loading progressbar
-   */
-  showProgress() {
-    this.nodes.progress.classList.add(this.CSS.progressLoading);
-  }
-
-  /**
-   * Hide loading progressbar
-   */
-  hideProgress() {
-    return new Promise((resolve) => {
-      this.nodes.progress.classList.remove(this.CSS.progressLoading);
-      this.nodes.progress.classList.add(this.CSS.progressLoaded);
-
-      setTimeout(resolve, 500);
-    });
-  }
-
-  /**
-   * If data fetching failed, set input error style
-   */
-  applyErrorStyle() {
-    this.nodes.inputHolder.classList.add(this.CSS.inputError);
-    this.nodes.progress.remove();
-  }
-
-  /**
-   * Sends to backend pasted url and receives link data
-   * @param {string} url - link source url
-   */
-  async fetchLinkData(url) {
-    this.showProgress();
-    this.data = { link: url };
-
-    try {
-      const response = await ajax.get({
-        url: this.config.endpoint,
-        data: {
-          url
-        }
-      });
-
-      this.onFetch(response);
-    } catch (error) {
-      this.fetchingFailed("Haven't received data from server");
-    }
-  }
-
-  /**
-   * Link data fetching callback
-   * @param {UploadResponseFormat} response
-   */
-  onFetch(response) {
-    if (!response || !response.success) {
-      this.fetchingFailed('Can not get this link data, try another');
-      return;
-    }
-
-    const metaData = response.meta;
-
-    this.data = { meta: metaData };
-
-    if (!metaData) {
-      this.fetchingFailed('Wrong response format from server');
-      return;
-    }
-
-    this.hideProgress().then(() => {
-      this.nodes.inputHolder.remove();
-      this.showLinkPreview(metaData);
-    });
-  }
-
-  /**
-   * Handle link fetching errors
-   * @private
-   *
-   * @param {string} errorMessage
-   */
-  fetchingFailed(errorMessage) {
-    this.api.notifier.show({
-      message: errorMessage,
-      style: 'error'
-    });
-
-    this.applyErrorStyle();
   }
 }
