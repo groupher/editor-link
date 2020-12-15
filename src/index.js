@@ -76,19 +76,7 @@ export default class LinkTool {
       endpoint: config.endpoint || ''
     };
 
-    this.nodes = {
-      // root element
-      wrapper: null,
-      container: null,
-      progress: null,
-      input: null,
-      inputHolder: null,
-      linkContent: null,
-      linkImage: null,
-      linkTitle: null,
-      linkDescription: null,
-      linkText: null
-    };
+    this.element = null;
 
     this._data = {
       link: '',
@@ -100,7 +88,8 @@ export default class LinkTool {
     this.ui = new Ui({
       api,
       config: this.config,
-      data: this.data
+      data: this.data,
+      changeView: this.changeView.bind(this)
       // setTune: this.setTune.bind(this),
       // setData: this.setData.bind(this),
     });
@@ -113,17 +102,31 @@ export default class LinkTool {
    * @return {HTMLDivElement}
    */
   render() {
-    this.nodes.wrapper = make('div', this.CSS.baseClass);
-    this.nodes.container = make('div', this.CSS.container);
-
     /**
      * If Tool already has data, render link preview, otherwise insert input
      */
     if (Object.keys(this.data.meta).length) {
-      return this.ui.buildInputView();
+      this.element = this.ui.buildInputView();
       // return this.ui.buildCardView();
     } else {
-      return this.ui.buildInputView();
+      this.element = this.ui.buildInputView();
+    }
+
+    return this.element;
+  }
+
+  /**
+   * change the current view
+   */
+  changeView(view) {
+    switch (view) {
+      case 'card': {
+        return this.replaceElement(this.ui.buildCardView());
+      }
+
+      default: {
+        return this.replaceElement(this.ui.buildInputView());
+      }
     }
   }
 

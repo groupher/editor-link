@@ -13,16 +13,9 @@ export default class UI {
    * @param {config} config - user config for Tool
    * @param {object} api - Editor.js API
    */
-  constructor({ data, config, api }) {
-    // this.ui = new Ui({
-    //   api,
-    //   config: this.config,
-    //   data: this._data,
-    //   setTune: this.setTune.bind(this),
-    //   setData: this.setData.bind(this),
-    // });
-
+  constructor({ data, config, api, changeView }) {
     this.api = api;
+    this.changeView = changeView;
 
     /**
      * Tool's initial config
@@ -87,24 +80,53 @@ export default class UI {
   }
 
   /**
+   * just for debug
+   *
+   */
+  async getFakeData() {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        return resolve({
+          success: true,
+          meta: {
+            title: 'CodeX Team',
+            // eslint-disable-next-line
+            site_name: "CodeX",
+            description:
+              'Club of web-development, design and marketing. We build team learning how to build full-valued projects on the world market.',
+            image: {
+              url: 'https://codex.so/public/app/img/meta_img.png'
+            }
+          }
+        });
+      }, 1000);
+    });
+  }
+
+  /**
    * Sends to backend pasted url and receives link data
    * @param {string} url - link source url
    */
   async fetchLinkData(url) {
     this.showProgress();
-    this.data = { link: url };
+    // this.data = { link: url };
+    this.data.link = url;
 
     try {
-      const response = await ajax.get({
-        url: this.config.endpoint,
-        data: {
-          url
-        }
-      });
+      // const response = await ajax.get({
+      //   url: this.config.endpoint,
+      //   data: {
+      //     url,
+      //   },
+      // });
 
+      // this.onFetch(response);
+      const response = await this.getFakeData();
+
+      console.log('the response: ', response);
       this.onFetch(response);
     } catch (error) {
-      this.fetchingFailed("Haven't received data from server");
+      this.fetchingFailed('服务器：解析错误，请输入正确的 URL 地址');
     }
   }
 
@@ -120,7 +142,7 @@ export default class UI {
 
     const metaData = response.meta;
 
-    this.data = { meta: metaData };
+    this.data.meta = metaData;
 
     if (!metaData) {
       this.fetchingFailed('Wrong response format from server');
@@ -129,9 +151,16 @@ export default class UI {
 
     this.hideProgress().then(() => {
       this.nodes.inputHolder.remove();
-      // TODO:
-      // this.showLinkPreview(metaData);
+      this.changeView('card');
     });
+  }
+
+  /**
+   * If data fetching failed, set input error style
+   */
+  applyErrorStyle() {
+    this.nodes.inputHolder.classList.add(this.CSS.inputError);
+    this.nodes.progress.remove();
   }
 
   /**
@@ -153,6 +182,8 @@ export default class UI {
    * buildCardView
    */
   buildCardView() {
+    console.log('buildCardView this.data: ', this.data);
+
     const wrapperEl = make('div', this.CSS.baseClass);
     const containerEl = make('div', this.CSS.container);
 
@@ -199,28 +230,28 @@ export default class UI {
     // TODO: i18n
     this.nodes.input.dataset.placeholder = '链接地址';
 
-    // this.nodes.input.addEventListener('paste', (event) => {
-    //   this.startFetching(event);
-    // });
+    this.nodes.input.addEventListener('paste', (event) => {
+      this.startFetching(event);
+    });
 
-    // this.nodes.input.addEventListener('keydown', (event) => {
-    //   const [ENTER, A] = [13, 65];
-    //   const cmdPressed = event.ctrlKey || event.metaKey;
+    this.nodes.input.addEventListener('keydown', (event) => {
+      const [ENTER, A] = [13, 65];
+      const cmdPressed = event.ctrlKey || event.metaKey;
 
-    //   switch (event.keyCode) {
-    //     case ENTER:
-    //       event.preventDefault();
-    //       event.stopPropagation();
+      switch (event.keyCode) {
+        case ENTER:
+          event.preventDefault();
+          event.stopPropagation();
 
-    //       this.startFetching(event);
-    //       break;
-    //     case A:
-    //       if (cmdPressed) {
-    //         this.selectLinkUrl(event);
-    //       }
-    //       break;
-    //   }
-    // });
+          this.startFetching(event);
+          break;
+        case A:
+          if (cmdPressed) {
+            this.selectLinkUrl(event);
+          }
+          break;
+      }
+    });
 
     inputHolder.appendChild(this.nodes.progress);
     inputHolder.appendChild(this.nodes.input);
