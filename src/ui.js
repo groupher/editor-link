@@ -1,7 +1,8 @@
-import ajax from '@codexteam/ajax';
+// eslint-disable-next-line
+import ajax from "@codexteam/ajax";
 // eslint-disable-next-line
 import polyfill from "url-polyfill";
-import { make } from '@groupher/editor-utils';
+import { make } from "@groupher/editor-utils";
 
 /**
  * @description the ui parts
@@ -9,7 +10,7 @@ import { make } from '@groupher/editor-utils';
  */
 export default class UI {
   /**
-   * @param {LinkToolData} data - previously saved data
+   * @param {LinkCardData} data - previously saved data
    * @param {config} config - user config for Tool
    * @param {object} api - Editor.js API
    */
@@ -21,7 +22,7 @@ export default class UI {
      * Tool's initial config
      */
     this.config = {
-      endpoint: config.endpoint || ''
+      endpoint: config.endpoint || "",
     };
 
     this.nodes = {
@@ -35,12 +36,12 @@ export default class UI {
       linkImage: null,
       linkTitle: null,
       linkDescription: null,
-      linkText: null
+      linkText: null,
     };
 
     this._data = {
-      link: '',
-      meta: {}
+      link: "",
+      meta: {},
     };
 
     this.data = data;
@@ -58,24 +59,24 @@ export default class UI {
       /**
        * Tool's classes
        */
-      container: 'link-tool',
-      inputEl: 'link-tool__input',
-      inputHolder: 'link-tool__input-holder',
-      inputError: 'link-tool__input-holder--error',
-      linkContent: 'link-tool__content',
-      linkContentRendered: 'link-tool__content--rendered',
-      linkImage: 'link-tool__image',
-      linkTitle: 'link-tool__title',
-      linkDescription: 'link-tool__description',
-      linkText: 'link-tool__anchor',
-      progress: 'link-tool__progress',
-      progressLoading: 'link-tool__progress--loading',
-      progressLoaded: 'link-tool__progress--loaded',
+      container: "link-tool",
+      inputEl: "link-tool__input",
+      inputHolder: "link-tool__input-holder",
+      inputError: "link-tool__input-holder--error",
+      linkContent: "link-tool__content",
+      linkContentRendered: "link-tool__content--rendered",
+      linkImage: "link-tool__image",
+      linkTitle: "link-tool__title",
+      linkDescription: "link-tool__description",
+      linkText: "link-tool__anchor",
+      progress: "link-tool__progress",
+      progressLoading: "link-tool__progress--loading",
+      progressLoaded: "link-tool__progress--loaded",
 
       // buttons
-      settingsWrapper: 'cdx-custom-settings',
+      settingsWrapper: "cdx-custom-settings",
       settingsButton: this.api.styles.settingsButton,
-      settingsButtonActive: this.api.styles.settingsButtonActive
+      settingsButtonActive: this.api.styles.settingsButtonActive,
     };
   }
 
@@ -89,15 +90,15 @@ export default class UI {
         return resolve({
           success: true,
           meta: {
-            title: 'CodeX Team',
+            title: "CodeX Team",
             // eslint-disable-next-line
             site_name: "CodeX",
             description:
-              'Club of web-development, design and marketing. We build team learning how to build full-valued projects on the world market.',
+              "Club of web-development, design and marketing. We build team learning how to build full-valued projects on the world market.",
             image: {
-              url: 'https://codex.so/public/app/img/meta_img.png'
-            }
-          }
+              url: "https://codex.so/public/app/img/meta_img.png",
+            },
+          },
         });
       }, 1000);
     });
@@ -108,7 +109,7 @@ export default class UI {
    * @param {string} url - link source url
    */
   async fetchLinkData(url) {
-    this.showProgress();
+    this._showProgress();
     // this.data = { link: url };
     this.data.link = url;
 
@@ -123,10 +124,10 @@ export default class UI {
       // this.onFetch(response);
       const response = await this.getFakeData();
 
-      console.log('the response: ', response);
+      console.log("the response: ", response);
       this.onFetch(response);
     } catch (error) {
-      this.fetchingFailed('服务器：解析错误，请输入正确的 URL 地址');
+      this.fetchingFailed("服务器：解析错误，请输入正确的 URL 地址");
     }
   }
 
@@ -136,7 +137,7 @@ export default class UI {
    */
   onFetch(response) {
     if (!response || !response.success) {
-      this.fetchingFailed('Can not get this link data, try another');
+      this.fetchingFailed("Can not get this link data, try another");
       return;
     }
 
@@ -145,13 +146,13 @@ export default class UI {
     this.data.meta = metaData;
 
     if (!metaData) {
-      this.fetchingFailed('Wrong response format from server');
+      this.fetchingFailed("Wrong response format from server");
       return;
     }
 
-    this.hideProgress().then(() => {
+    this._hideProgress().then(() => {
       this.nodes.inputHolder.remove();
-      this.changeView('card');
+      this.changeView("card");
     });
   }
 
@@ -172,7 +173,7 @@ export default class UI {
   fetchingFailed(errorMessage) {
     this.api.notifier.show({
       message: errorMessage,
-      style: 'error'
+      style: "error",
     });
 
     this.applyErrorStyle();
@@ -182,10 +183,10 @@ export default class UI {
    * buildCardView
    */
   buildCardView() {
-    console.log('buildCardView this.data: ', this.data);
+    console.log("buildCardView this.data: ", this.data);
 
-    const wrapperEl = make('div', this.CSS.baseClass);
-    const containerEl = make('div', this.CSS.container);
+    const wrapperEl = make("div", this.CSS.baseClass);
+    const containerEl = make("div", this.CSS.container);
 
     this.nodes.container = containerEl;
     this.nodes.linkContent = this._prepareLinkPreview();
@@ -202,8 +203,8 @@ export default class UI {
    * buildInputView
    */
   buildInputView() {
-    const wrapperEl = make('div', this.CSS.baseClass);
-    const containerEl = make('div', this.CSS.container);
+    const wrapperEl = make("div", this.CSS.baseClass);
+    const containerEl = make("div", this.CSS.container);
 
     this.nodes.inputHolder = this._makeInputHolder();
 
@@ -220,21 +221,21 @@ export default class UI {
    * @private
    */
   _makeInputHolder() {
-    const inputHolder = make('div', this.CSS.inputHolder);
+    const inputHolder = make("div", this.CSS.inputHolder);
 
-    this.nodes.progress = make('label', this.CSS.progress);
-    this.nodes.input = make('div', [this.CSS.input, this.CSS.inputEl], {
-      contentEditable: true
+    this.nodes.progress = make("label", this.CSS.progress);
+    this.nodes.input = make("div", [this.CSS.input, this.CSS.inputEl], {
+      contentEditable: true,
     });
 
     // TODO: i18n
-    this.nodes.input.dataset.placeholder = '链接地址';
+    this.nodes.input.dataset.placeholder = "链接地址";
 
-    this.nodes.input.addEventListener('paste', (event) => {
+    this.nodes.input.addEventListener("paste", (event) => {
       this.startFetching(event);
     });
 
-    this.nodes.input.addEventListener('keydown', (event) => {
+    this.nodes.input.addEventListener("keydown", (event) => {
       const [ENTER, A] = [13, 65];
       const cmdPressed = event.ctrlKey || event.metaKey;
 
@@ -265,8 +266,8 @@ export default class UI {
   startFetching(event) {
     let url = this.nodes.input.textContent;
 
-    if (event.type === 'paste') {
-      url = (event.clipboardData || window.clipboardData).getData('text');
+    if (event.type === "paste") {
+      url = (event.clipboardData || window.clipboardData).getData("text");
     }
 
     this.removeErrorStyle();
@@ -283,15 +284,17 @@ export default class UI {
 
   /**
    * Show loading progressbar
+   * @private
    */
-  showProgress() {
+  _showProgress() {
     this.nodes.progress.classList.add(this.CSS.progressLoading);
   }
 
   /**
    * Hide loading progressbar
+   * @private
    */
-  hideProgress() {
+  _hideProgress() {
     return new Promise((resolve) => {
       this.nodes.progress.classList.remove(this.CSS.progressLoading);
       this.nodes.progress.classList.add(this.CSS.progressLoaded);
@@ -308,15 +311,15 @@ export default class UI {
   _prepareLinkPreview() {
     const { linkContent } = this.CSS;
 
-    const holder = make('a', linkContent, {
-      target: '_blank',
-      rel: 'nofollow noindex noreferrer'
+    const holder = make("a", linkContent, {
+      target: "_blank",
+      rel: "nofollow noindex noreferrer",
     });
 
-    this.nodes.linkImage = make('div', this.CSS.linkImage);
-    this.nodes.linkTitle = make('div', this.CSS.linkTitle);
-    this.nodes.linkDescription = make('p', this.CSS.linkDescription);
-    this.nodes.linkText = make('a', this.CSS.linkText);
+    this.nodes.linkImage = make("div", this.CSS.linkImage);
+    this.nodes.linkTitle = make("div", this.CSS.linkTitle);
+    this.nodes.linkDescription = make("p", this.CSS.linkDescription);
+    this.nodes.linkText = make("a", this.CSS.linkText);
 
     return holder;
   }
@@ -330,7 +333,7 @@ export default class UI {
     this.nodes.container.appendChild(this.nodes.linkContent);
 
     if (image && image.url) {
-      this.nodes.linkImage.style.backgroundImage = 'url(' + image.url + ')';
+      this.nodes.linkImage.style.backgroundImage = "url(" + image.url + ")";
       this.nodes.linkContent.appendChild(this.nodes.linkImage);
     }
 
@@ -345,10 +348,10 @@ export default class UI {
     }
 
     const { link } = this.data;
-    const linkAddr = link.indexOf('http') === 0 ? link : `http://${link}`;
+    const linkAddr = link.indexOf("http") === 0 ? link : `http://${link}`;
 
     this.nodes.linkContent.classList.add(this.CSS.linkContentRendered);
-    this.nodes.linkContent.setAttribute('href', linkAddr);
+    this.nodes.linkContent.setAttribute("href", linkAddr);
     this.nodes.linkContent.appendChild(this.nodes.linkText);
 
     try {

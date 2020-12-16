@@ -1,5 +1,5 @@
 /**
- * @typedef {object} LinkToolData
+ * @typedef {object} LinkCardData
  * @description Link Tool's input and output data format
  * @property {string} link — data url
  * @property {metaData} meta — fetched link data
@@ -24,7 +24,6 @@ import EditIcon from './svg/edit.svg';
 
 import Ui from './ui';
 
-import ajax from '@codexteam/ajax';
 // eslint-disable-next-line
 import polyfill from "url-polyfill";
 
@@ -37,7 +36,7 @@ import polyfill from "url-polyfill";
  * Tool may have any data provided by backend, currently are supported by design:
  * title, description, image, url
  */
-export default class LinkTool {
+export default class LinkCard {
   /**
    * Get Tool toolbox settings
    * icon - Tool icon's SVG
@@ -45,15 +44,15 @@ export default class LinkTool {
    *
    * @return {{icon: string, title: string}}
    */
-  static get toolbox() {
-    return {
-      icon: ToolboxIcon,
-      title: '链接'
-    };
-  }
+  // static get toolbox() {
+  //   return {
+  //     icon: ToolboxIcon,
+  //     title: '链接'
+  //   };
+  // }
 
   /**
-   * Allow to press Enter inside the LinkTool input
+   * Allow to press Enter inside the LinkCard input
    * @returns {boolean}
    * @public
    */
@@ -62,7 +61,7 @@ export default class LinkTool {
   }
 
   /**
-   * @param {LinkToolData} data - previously saved data
+   * @param {LinkCardData} data - previously saved data
    * @param {config} config - user config for Tool
    * @param {object} api - Editor.js API
    */
@@ -193,7 +192,7 @@ export default class LinkTool {
    * Return Block data
    * @public
    *
-   * @return {LinkToolData}
+   * @return {LinkCardData}
    */
   save() {
     return this.data;
@@ -201,7 +200,7 @@ export default class LinkTool {
 
   /**
    * Stores all Tool's data
-   * @param {LinkToolData} data
+   * @param {LinkCardData} data
    */
   set data(data) {
     this._data = Object.assign(
@@ -215,7 +214,7 @@ export default class LinkTool {
 
   /**
    * Return Tool data
-   * @return {LinkToolData} data
+   * @return {LinkCardData} data
    */
   get data() {
     return this._data;

@@ -25,7 +25,7 @@ npm i --save-dev @editorjs/link
 Include module at your application
 
 ```javascript
-const LinkTool = require('@editorjs/link');
+const LinkCard = require("@editorjs/link");
 ```
 
 ### Download to your project's source dir
@@ -51,8 +51,8 @@ var editor = EditorJS({
 
   tools: {
     ...
-    linkTool: {
-      class: LinkTool,
+    LinkCard: {
+      class: LinkCard,
       config: {
         endpoint: 'http://localhost:8008/fetchUrl', // Your backend endpoint for url data fetching
       }
@@ -67,33 +67,33 @@ var editor = EditorJS({
 
 Link Tool supports these configuration parameters:
 
-| Field    | Type        | Description                                    |
-| ---------|-------------|------------------------------------------------|
-| endpoint | `string`    | **Required:** endpoint for link data fetching. |
+| Field    | Type     | Description                                    |
+| -------- | -------- | ---------------------------------------------- |
+| endpoint | `string` | **Required:** endpoint for link data fetching. |
 
 ## Output data
 
 This Tool returns `data` with following format
 
-| Field          | Type      | Description                     |
-| -------------- | --------- | ------------------------------- |
-| link           | `string`  | Pasted link url                 |
-| meta           | `object`  | Fetched link data. Any data got from backend. Currently title, image and description are supported by plugin's design. |
+| Field | Type     | Description                                                                                                            |
+| ----- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| link  | `string` | Pasted link url                                                                                                        |
+| meta  | `object` | Fetched link data. Any data got from backend. Currently title, image and description are supported by plugin's design. |
 
 ```json
 {
-    "type" : "linkTool",
-    "data" : {
-        "link" : "https://codex.so",
-        "meta" : {
-            "title" : "CodeX Team",
-            "site_name" : "CodeX",
-            "description" : "Club of web-development, design and marketing. We build team learning how to build full-valued projects on the world market.",
-            "image" : {
-                "url" : "https://codex.so/public/app/img/meta_img.png"
-            }
-        }
+  "type": "LinkCard",
+  "data": {
+    "link": "https://codex.so",
+    "meta": {
+      "title": "CodeX Team",
+      "site_name": "CodeX",
+      "description": "Club of web-development, design and marketing. We build team learning how to build full-valued projects on the world market.",
+      "image": {
+        "url": "https://codex.so/public/app/img/meta_img.png"
+      }
     }
+  }
 }
 ```
 
@@ -106,28 +106,30 @@ Backend response **should** cover following format:
 
 ```json5
 {
-    "success" : 1,
-    "meta": {
-        // ... any fields you want
-    }
+  success: 1,
+  meta: {
+    // ... any fields you want
+  },
 }
 ```
 
 **success** — uploading status. 1 for successful, 0 for failed
 
-**meta** — link fetched data. 
+**meta** — link fetched data.
 
 Currently title, image and description fields are supported by plugin's design . They should have the following format in the response:
+
 ```json5
 {
-    "success" : 1,
-    "meta": {
-        "title" : "CodeX Team",
-        "description" : "Club of web-development, design and marketing. We build team learning how to build full-valued projects on the world market.",
-        "image" : {
-            "url" : "https://codex.so/public/app/img/meta_img.png"
-        }
-    }
+  success: 1,
+  meta: {
+    title: "CodeX Team",
+    description: "Club of web-development, design and marketing. We build team learning how to build full-valued projects on the world market.",
+    image: {
+      url: "https://codex.so/public/app/img/meta_img.png",
+    },
+  },
 }
 ```
-Also, can contain any additional fields you want to store. 
+
+Also, can contain any additional fields you want to store.

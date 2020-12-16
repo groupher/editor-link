@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require("path");
 
 module.exports = {
   module: {
@@ -6,36 +6,36 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        use: ['babel-loader', 'eslint-loader?fix=true']
+        use: ["babel-loader", "eslint-loader?fix=true"],
       },
       {
         test: /\.css$/,
         use: [
-          'style-loader',
-          'css-loader',
+          "style-loader",
+          "css-loader",
           {
-            loader: 'postcss-loader',
+            loader: "postcss-loader",
             options: {
               plugins: [
-                require('postcss-nested-ancestors'),
-                require('postcss-nested')
-              ]
-            }
-          }
-        ]
+                require("postcss-nested-ancestors"),
+                require("postcss-nested"),
+              ],
+            },
+          },
+        ],
       },
       {
         test: /\.svg$/,
-        loader: 'svg-inline-loader?removeSVGTagAttrs=false'
-      }
-    ]
+        loader: "svg-inline-loader?removeSVGTagAttrs=false",
+      },
+    ],
   },
   output: {
-    path: path.join(__dirname, '/dist'),
-    publicPath: '/',
-    filename: 'bundle.js',
-    library: 'LinkTool',
-    libraryExport: 'default',
-    libraryTarget: 'umd'
-  }
+    path: path.join(__dirname, "/dist"),
+    publicPath: "/",
+    filename: "bundle.js",
+    library: "LinkCard",
+    libraryExport: "default",
+    libraryTarget: "umd",
+  },
 };
